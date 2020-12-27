@@ -153,9 +153,13 @@ class ShipyGame:
         self.turn = 0
         self.name = 'self'
 
-    def make_player(self, player_type: type, name: object):
-        self.players.append(player_type(name))
-        return self.players[-1]
+    def make_player(self, player_type: type, name: object, level=None):
+        if level is not None:
+            self.players.append(player_type(name, level))
+            return self.players[-1]
+        else:
+            self.players.append(player_type(name))
+            return self.players[-1]
 
     def next_turn(self):
         self.turn += 1
@@ -286,7 +290,7 @@ class Player:
 
 
 class AI(Player):
-    def __init__(self, name):
+    def __init__(self, name, level):
         super(AI, self).__init__(name)
         self.next_targets = []
         self.direction = None
@@ -295,6 +299,7 @@ class AI(Player):
         self.wait_time = 0.5
         self.hit_sound = SoundLoader.load('soundfile/hit.wav')
         self.miss_sound = SoundLoader.load('soundfile/miss.wav')
+        self.level = level
 
     def remove_surrounding_targets(self, row, col):
         for i in range(-1, 2):
@@ -338,52 +343,130 @@ class AI(Player):
         return cell_id in self.viable_targets
 
     def start_turn(self):
-        if len(self.next_targets):
-            row, col = self.next_targets[0][0], self.next_targets[0][1]
-            self.next_targets.pop(0)
-        else:
-            random.seed(time.time())
-            index = random.randrange(0, len(self.viable_targets))
-            cell_id = self.viable_targets[index]
-            row, col = cell_id // 10, cell_id % 10
-
-        ship = self.screen.ship_grid.virtual_grid[row][col].on_release()
-
-        if ship:
-            if ship.is_drowned():
-                # if it's down, there's no need to check remaining cells
-                self.prev_target = None
-                self.next_targets = []
-                self.direction = None
+        if self.level == 'Junior':
+            if len(self.next_targets):
+                row, col = self.next_targets[0][0], self.next_targets[0][1]
+                self.next_targets.pop(0)
             else:
-                if not self.prev_target:
-                    # check surrounding area
-                    if self.is_available(row + 1, col):
-                        self.next_targets.append((row + 1, col))
+                random.seed(time.time())
+                index = random.randrange(0, len(self.viable_targets))
+                cell_id = self.viable_targets[index]
+                row, col = cell_id // 10, cell_id % 10
 
-                    if self.is_available(row, col + 1):
-                        self.next_targets.append((row, col + 1))
+            ship = self.screen.ship_grid.virtual_grid[row][col].on_release()
 
-                    if self.is_available(row - 1, col):
-                        self.next_targets.append((row - 1, col))
-
-                    if self.is_available(row, col - 1):
-                        self.next_targets.append((row, col - 1))
-
+            if ship:
+                if ship.is_drowned():
+                    # if it's down, there's no need to check remaining cells
+                    self.prev_target = None
+                    self.next_targets = []
                     self.direction = None
-                    self.prev_target = (row, col)
-                else:
-                    if not self.direction:
-                        self.next_targets = []
-                        self.direction = (row - self.prev_target[0], col - self.prev_target[1])
-                    # check before and after previous target in found direction
-                    row, col = row + self.direction[0], col + self.direction[1]
+            else:
+                if self.prev_target and self.direction:
+                    self.direction = (-self.direction[0], -self.direction[1])
+
+                    row, col = self.prev_target[0] + self.direction[0], self.prev_target[1] + self.direction[1]
                     if self.is_available(row, col):
                         self.next_targets.append((row, col))
-        else:
-            if self.prev_target and self.direction:
-                self.direction = (-self.direction[0], -self.direction[1])
 
-                row, col = self.prev_target[0] + self.direction[0], self.prev_target[1] + self.direction[1]
-                if self.is_available(row, col):
-                    self.next_targets.append((row, col))
+        if self.level == 'Middle':
+            if len(self.next_targets):
+                row, col = self.next_targets[0][0], self.next_targets[0][1]
+                self.next_targets.pop(0)
+            else:
+                random.seed(time.time())
+                index = random.randrange(0, len(self.viable_targets))
+                cell_id = self.viable_targets[index]
+                row, col = cell_id // 10, cell_id % 10
+
+            ship = self.screen.ship_grid.virtual_grid[row][col].on_release()
+
+            if ship:
+                if ship.is_drowned():
+                    # if it's down, there's no need to check remaining cells
+                    self.prev_target = None
+                    self.next_targets = []
+                    self.direction = None
+                else:
+                    if not self.prev_target:
+                        # check surrounding area
+                        if self.is_available(row + 1, col):
+                            self.next_targets.append((row + 1, col))
+
+                        if self.is_available(row, col + 1):
+                            self.next_targets.append((row, col + 1))
+
+                        if self.is_available(row - 1, col):
+                            self.next_targets.append((row - 1, col))
+
+                        if self.is_available(row, col - 1):
+                            self.next_targets.append((row, col - 1))
+
+                        self.direction = None
+                        self.prev_target = (row, col)
+                    else:
+                        if not self.direction:
+                            self.next_targets = []
+                            self.direction = (row - self.prev_target[0], col - self.prev_target[1])
+                        # check before and after previous target in found direction
+                        row, col = row + self.direction[0], col + self.direction[1]
+                        if self.is_available(row, col):
+                            self.next_targets.append((row, col))
+            else:
+                if self.prev_target and self.direction:
+                    self.direction = (-self.direction[0], -self.direction[1])
+
+                    row, col = self.prev_target[0] + self.direction[0], self.prev_target[1] + self.direction[1]
+                    if self.is_available(row, col):
+                        self.next_targets.append((row, col))
+
+        if self.level == 'Senior':
+            if len(self.next_targets):
+                row, col = self.next_targets[0][0], self.next_targets[0][1]
+                self.next_targets.pop(0)
+            else:
+                random.seed(time.time())
+                index = random.randrange(0, len(self.viable_targets))
+                cell_id = self.viable_targets[index]
+                row, col = cell_id // 10, cell_id % 10
+
+            ship = self.screen.ship_grid.virtual_grid[row][col].on_release()
+
+            if ship:
+                if ship.is_drowned():
+                    # if it's down, there's no need to check remaining cells
+                    self.prev_target = None
+                    self.next_targets = []
+                    self.direction = None
+                else:
+                    if not self.prev_target:
+                        # check surrounding area
+                        if self.is_available(row + 1, col):
+                            self.next_targets.append((row + 1, col))
+
+                        if self.is_available(row, col + 1):
+                            self.next_targets.append((row, col + 1))
+
+                        if self.is_available(row - 1, col):
+                            self.next_targets.append((row - 1, col))
+
+                        if self.is_available(row, col - 1):
+                            self.next_targets.append((row, col - 1))
+
+                        self.direction = None
+                        self.prev_target = (row, col)
+                    else:
+                        if not self.direction:
+                            self.next_targets = []
+                            self.direction = (row - self.prev_target[0], col - self.prev_target[1])
+                        # check before and after previous target in found direction
+                        row, col = row + self.direction[0], col + self.direction[1]
+                        if self.is_available(row, col):
+                            self.next_targets.append((row, col))
+            else:
+                if self.prev_target and self.direction:
+                    self.direction = (-self.direction[0], -self.direction[1])
+
+                    row, col = self.prev_target[0] + self.direction[0], self.prev_target[1] + self.direction[1]
+                    if self.is_available(row, col):
+                        self.next_targets.append((row, col))

@@ -7,11 +7,13 @@ from kivy.uix.textinput import TextInput
 
 from ..game import ShipyGame, Player, AI, singleplayer_init, pvp_init
 from ..screen.highscores import highscores_init
+from ..screen.level import level_init
 from ..screen.player import PlayerScreen
 from ..styledbutton import StyledButton
 
 Builder.load_file('app/screen/kv/menuscreen.kv')
 first_time = True
+game_level = 'Middle'
 
 
 def clear_previous_session(callback, text):
@@ -41,11 +43,15 @@ def clear_previous_session(callback, text):
     return game, screen_manager
 
 
-def prepare_game(player1: type, player2: type, session_init, text, screen, *args):
+def prepare_game(level, player1: type, player2: type, session_init, text, screen, *args):
     game, screen_manager = clear_previous_session(session_init, text)
 
-    game.make_player(player1, 'Computer')
-    game.make_player(player2, 'Computer')
+    if player2 != Player:
+        game.make_player(player1, 'Computer')
+        game.make_player(player2, 'Computer', level=level)
+    else:
+        game.make_player(player1, 'Computer')
+        game.make_player(player2, 'Computer')
 
     screen_manager.transition = FadeTransition(duration=0.3)
     screen_manager.current = screen
@@ -59,7 +65,7 @@ class MenuButtonAnimation(Animation):
 
     def on_complete(self, widget):
         if widget.player1 and widget.player2:
-            prepare_game(widget.player1, widget.player2, widget.screen_init, widget.button_text, widget.screen)
+            prepare_game(game_level, widget.player1, widget.player2, widget.screen_init, widget.button_text, widget.screen)
         else:
             if widget.screen_init:
                 widget.screen_init()
@@ -101,11 +107,30 @@ class SingleplayerButton(MainMenuButton):
         self.button_text = 'Play'
 
 
-# class ContinueButton(MainMenuButton):
-#     def __init__(self, **kwargs):
-#         super(ContinueButton, self).__init__(**kwargs)
-#         self.screen = 'continue'
-#         self.button_text = 'Continue Last Game'
+class LevelButton(MainMenuButton):
+    def __init__(self, **kwargs):
+        super(LevelButton, self).__init__(**kwargs)
+        self.screen_init = level_init
+        self.screen = 'level'
+
+
+class ContinueButton(MainMenuButton):
+    pass
+
+
+class JuniorLvlButton(MainMenuButton):
+    global game_level
+    game_level = 'Junior'
+
+
+class MiddleLvlButton(MainMenuButton):
+    global game_level
+    game_level = 'Middle'
+
+
+class SeniorLvlButton(MainMenuButton):
+    global game_level
+    game_level = 'Senior'
 
 
 class HighscoresButton(MainMenuButton):

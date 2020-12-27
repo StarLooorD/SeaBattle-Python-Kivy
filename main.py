@@ -11,6 +11,7 @@ from kivy.uix.screenmanager import ScreenManager
 
 import app.screen
 from app.screen.highscores import Highscores
+from app.screen.level import Level
 
 kivy.require('1.9.1')
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
@@ -42,6 +43,7 @@ class ShipyApp(App):
         self.screen_manager = Builder.load_file('app/screen/kv/screenmanager.kv')
         self.sound = SoundLoader.load('soundfile/main_theme.mp3')
         self.highscores = Highscores()
+        self.level = Level()
         atexit.register(self.highscores.write_to_file)
 
     def build(self):

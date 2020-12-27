@@ -1,0 +1,72 @@
+#:kivy 1.9.1
+
+<ScoreLegend@Label>:
+    size_hint_y: None
+    canvas.before:
+        Color:
+            rgb: (.9, .9, .9)
+        Rectangle:
+            size: self.size[0], 1
+            pos: self.pos[0], self.pos[1] + 15
+
+<Score>:
+    rows: 1
+    padding: 10
+    spacing: 10
+    size_hint_y:  None
+
+<LevelScreen>:
+    name: 'level'
+    score_list: list
+
+    AsyncImage:
+        source: 'assets/screen.jpg'
+        allow_stretch: True
+        keep_ratio: False
+        keep_data: True
+
+    FloatLayout:
+
+        Image:
+            source: 'assets/logo.png'
+            size_hint_y: None
+            center_y: root.height - 70
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: 0.5, None
+            size: 0, root.height - 200
+            pos_hint: {'center_x': .5, 'center_y': .4}
+            canvas.before:
+                Color:
+                    rgb: (20.0/255, 20.0/255, 28.0/255)
+                Rectangle:
+                    size: self.size[0], 3
+                    pos: self.pos[0], 70
+            canvas.after:
+                Color:
+                    rgb: (20.0/255, 20.0/255, 28.0/255)
+                Rectangle:
+                    size: self.size[0], 3
+                    pos: self.pos[0], self.pos[1] + self.size[1] + 20
+
+
+            JuniorLvlButton:
+                text: 'Junior'
+
+            MiddleLvlButton:
+                text: 'Middle'
+
+            SeniorLvlButton:
+                text: 'Senior'
+
+    FloatLayout:
+
+        StyledButton:
+            font_name: 'Old'
+            size_hint: None, None
+            size: 2 * root.width / 5, 60
+            center_x: root.width / 2
+            text: 'Main menu'
+            on_release:
+                app.screen_manager.current = 'main'
