@@ -6,5 +6,5 @@ class Color:
     green = (0, 229.0/250.0, 0, 1)
     miss_color = (0, 0, 128, 1)
     hit_color = (255, 0, 0, 1)
-    first_player_color = (.2, .2, .8, .8)
-    second_player_color = (.8, .2, .2, .8)
+    first_player_color = (0, 0, 0, 1)
+    second_player_color = (0, 0, 0, 1)

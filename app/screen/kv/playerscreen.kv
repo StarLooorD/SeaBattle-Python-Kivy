@@ -8,6 +8,7 @@
     ship_grid: grid
     ship_counter: counter
     turn_indicator: turn
+    save_button: save
 
     AsyncImage:
         source: 'assets/title_screen.jpg'
@@ -27,7 +28,7 @@
                 text: ''
                 font_size: 26
                 size_hint: 1, 0.1
-                pos: 0, root.height * 0.02
+                pos: 0, root.height * 0.9
 
             Label:
                 id: counter
@@ -44,3 +45,15 @@
             rows: 10
             cols: 10
             spacing: 2
+
+        FloatLayout:
+
+            StyledButton:
+                id: save
+                font_name: 'Old'
+                size_hint: None, None
+                size: 2 * root.width / 5, 60
+                center_x: root.width / 2
+                text: 'Save Game'
+                on_release:
+                    app.screen_manager.current = 'main'
